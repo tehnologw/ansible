@@ -1,5 +1,5 @@
 ---
-- name: repair links in organizer
+- name: repair links in r7organizer
   hosts: single_host
   tasks:
    - name: create symlinks

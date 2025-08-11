@@ -9,9 +9,9 @@
    - name: find dirs
      find:
       paths: /home/
-      file_type: directory      
+      file_type: directory
      register: find_dirs
-     
+
    - name: create dirs Code Industry
      file:
       path: "{{ item.path }}/.config/Code\ Industry"
@@ -24,7 +24,7 @@
    - name: touch files
      file:
       path: "{{ item.path }}/.config/Code\ Industry/Master\ PDF\ Editor\ 5.conf"
-      state: touch      
+      state: touch
       owner: "{{ item.pw_name }}"
       group: "{{ item.gr_name }}"
      with_items: "{{ find_dirs.files }}"
@@ -35,7 +35,7 @@
       path: "{{ item.path }}/.config/Code\ Industry/Master\ PDF\ Editor\ 5.conf"
       block: |
        [General]
-       license-server-ip=name.mpelicenseserver..ru
+       license-server-ip=name.mpelicenseserver.ru
        RegistrationCode=REGINFOHERE
      with_items: "{{ find_dirs.files }}"
      when: item.pw_name not in local_admins
