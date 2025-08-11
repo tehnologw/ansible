@@ -1,0 +1,27 @@
+---
+- name: install x11vnc
+  hosts: single_host
+  tasks:
+   - name: install x11vnc package
+     dnf:
+      name: x11vnc
+      state: latest
+
+   - command: x11vnc -storepasswd "pA$$wd" /etc/vncpasswd
+   
+   - name: copy x11vnc.service to /lib/systemd/
+     copy:
+      src: x11vnc.service
+      dest: /lib/systemd/system/
+      backup: yes
+
+   - name: make daemon-reload
+     systemd:
+      daemon_reload: true 
+
+   - name: start x11vnc
+     systemd:
+      name: x11vnc
+      state: started 
+   
+
