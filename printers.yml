@@ -1,0 +1,15 @@
+---
+- name: install printers
+  hosts: single_host
+  vars:
+   printers: 
+    # insert here printers that need to install
+    - MPC2011
+
+  tasks:
+   - command: lpadmin -p {{ item.name }} -E -v {{ item.backend}} -m {{ item.drv }}
+     loop: 
+      - { name: MPC2011, backend: ipp://192.168.100.201/ipp, drv: foomatic:Generic-PCL_6_PCL_XL_Printer-hpijs-pcl5c.ppd }
+      - { name: Lex511, backend: socket://192.168.100.202/, drv: foomatic:Lexmark-MX510-Postscript.ppd }
+      - { name: HP3027, backend: ipp://192.168.100.203/ipp, drv: drv:///hp/hpcups.drv/hp-laserjet_m3027_mfp-pcl3.ppd }
+     when: item.name in printers

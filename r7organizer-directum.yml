@@ -1,0 +1,69 @@
+---
+- name: set r7organizer as mailapp for directum
+  hosts: single_host
+  vars:
+   str_to_replace:
+    - "x-scheme-handler/mailto="
+    - "message/rfc822="
+    - "application/x-extension-eml="
+  
+  tasks:
+   - name: check thunderbird is installed 
+     stat:
+      path: /usr/lib64/thunderbird
+     register: thndrbrd
+
+   - name: change organizer if thunderbird not installed
+     block:
+      - name: copy .desktop file to /usr/share/applications
+        copy:
+         src: /home/share/src/thunderbirdorganizerdirectum.desktop
+         dest: /usr/share/applications/thunderbirdorganizerdirectum.desktop
+         owner: root
+         group: root
+         mode: '644'
+
+      - command: update-desktop-database
+
+      - name: symlink to /usr/bin/thunderbird
+        file:
+         src: /opt/r7-office/organizer/r7organizer
+         dest: /usr/bin/thunderbird
+         state: link
+         owner: root
+         group: root
+
+      - name: find dirs
+        find:
+         paths: /home/
+         file_type: directory
+        register: find_dirs
+
+      - name: check if file exist
+        stat: 
+         path: "{{ item.path }}/.config/mimeapps.list"
+        register: find_files
+        with_items: "{{ find_dirs.files }}"
+
+      - name: change in ~/.config/mimeapps.list
+        replace:
+         path: "{{ item.0.item.path }}/.config/mimeapps.list"
+         regexp: "{{ item.1 }}.*"
+         replace: "{{ item.1 }}thunderbirdorganizerdirectum.desktop"
+         owner: "{{ item.0.item.pw_name }}"
+         group: "{{ item.0.item.gr_name }}"
+        with_nested:
+         - "{{ find_files.results }}"
+         - "{{ str_to_replace }}"
+        when: item.0.stat.exists
+     
+     when: not thndrbrd.stat.exists
+
+
+
+   - name: Message if thunderbird installed
+     debug:
+      msg: "Thunderbird installed! Playbook cancelled!"
+     when: thndrbrd.stat.isdir is defined and thndrbrd.stat.isdir
+  
+  

@@ -1,0 +1,33 @@
+---
+- name: send messages for all users
+  hosts: single_host
+  vars:
+   header_txt: "This is notify ;)"
+   main_txt: "Please contact <b>77-77-77</b>"
+   txt_time: 6000
+   #воскл.знак
+#   txt_icon: important 
+   #молоток и гаечный ключ
+#   txt_icon: preferences-system 
+   #часы
+#   txt_icon: preferences-system-time 
+   #обезъянка
+   txt_icon: face-monkey
+   #лампочка
+#   txt_icon: info
+
+  tasks:
+   - command: who
+     register: uname_q
+
+   - name: create list of users (logged in GUI) and display nums
+     set_fact:
+      users_disp: "{{ users_disp | default([]) + [{ 'uname' : item.split(' ')[0], 'dnum' : item | regex_replace ('.+\\(:(?P<disp_num>\\d+)\\)', '\\g<disp_num>') }] }}"
+     with_items: "{{ uname_q.stdout_lines }}"
+     when: item is regex '.+\(:\d+\)'
+
+   - command: 'env DISPLAY=:{{ item.dnum }}.0 notify-send --urgency normal -i {{ txt_icon }} -t {{ txt_time }} -h int:x:500 -h int:y:500 "{{ header_txt }}" "{{ main_txt }}"' && 'sleep 300'
+     with_items: "{{ users_disp }}"
+     when: users_disp is defined
+     become: yes	
+     become_user: "{{ item.uname }}"

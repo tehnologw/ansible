@@ -1,0 +1,41 @@
+---
+- name: install Master Pdf Editor
+  hosts: single_host
+  vars:
+   local_admins:
+    - admin1
+    - admin2
+  tasks:
+   - name: find dirs
+     find:
+      paths: /home/
+      file_type: directory      
+     register: find_dirs
+     
+   - name: create dirs Code Industry
+     file:
+      path: "{{ item.path }}/.config/Code\ Industry"
+      state: directory
+      owner: "{{ item.pw_name }}"
+      group: "{{ item.gr_name }}"
+     with_items: "{{ find_dirs.files }}"
+     when: item.pw_name not in local_admins
+
+   - name: touch files
+     file:
+      path: "{{ item.path }}/.config/Code\ Industry/Master\ PDF\ Editor\ 5.conf"
+      state: touch      
+      owner: "{{ item.pw_name }}"
+      group: "{{ item.gr_name }}"
+     with_items: "{{ find_dirs.files }}"
+     when: item.pw_name not in local_admins
+
+   - name: insert activation info
+     blockinfile:
+      path: "{{ item.path }}/.config/Code\ Industry/Master\ PDF\ Editor\ 5.conf"
+      block: |
+       [General]
+       license-server-ip=name.mpelicenseserver..ru
+       RegistrationCode=REGINFOHERE
+     with_items: "{{ find_dirs.files }}"
+     when: item.pw_name not in local_admins

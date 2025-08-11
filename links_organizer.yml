@@ -1,0 +1,12 @@
+---
+- name: repair links in organizer
+  hosts: single_host
+  tasks:
+   - name: create symlinks
+     file:
+      src: /usr/lib64/libnss{{ item }}.so
+      dest: /opt/r7-office/organizer/libnss{{ item }}.so
+      state: link
+      force: yes
+     loop: [3, util3, ckbi]
+

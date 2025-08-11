@@ -1,0 +1,27 @@
+---
+- name: change ErrorPolicy already installed printers & set default ErrorPolicy
+  hosts: single_host
+  tasks:
+   - name: change Default ErrorPolicy for printers /etc/cups/cupsd.conf
+     replace:
+      path: /etc/cups/cupsd.conf
+      regexp: 'ErrorPolicy stop-printer'
+      replace: 'ErrorPolicy abort-job'
+      backup: yes
+
+   - name: stop cups
+     systemd:
+      name: cups
+      state: stopped 
+
+   - name: change ErrorPolicy for all installed printers
+     replace:
+      path: /etc/cups/printers.conf
+      regexp: 'ErrorPolicy stop-printer'
+      replace: 'ErrorPolicy abort-job'
+      backup: yes
+
+   - name: start cups
+     systemd:
+      name: cups
+      state: started 
